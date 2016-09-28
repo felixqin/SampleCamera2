@@ -30,21 +30,29 @@ public class SampleGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        // Step 8: SurfaceTexture update texture image in context of GLSurfaceView.Renderer.onDrawFrame()
-        if(surfaceTexture != null) {
-            // Here is right context of calling SurfaceTexture.updateTexImage()
-            surfaceTexture.updateTexImage();
-            surfaceTexture = null;
-        }
+        try {
+            // Step 8: SurfaceTexture update texture image in context of GLSurfaceView.Renderer.onDrawFrame()
+            if (surfaceTexture != null) {
+                // Here is right context of calling SurfaceTexture.updateTexImage()
+                surfaceTexture.updateTexImage();
+                surfaceTexture = null;
+            }
 
-        // Step 9: Fragment shader draw preview texture (samplerExternalOES)
-        // Draw on MediaCodec InputSurface for encode
-        egl10.eglMakeCurrent(eglDisplay, eglSurfaceEncode, eglSurfaceEncode, eglContext);
-        sampleGL20Video.draw();
-        egl10.eglSwapBuffers(eglDisplay, eglSurfaceEncode);
-        // Draw on native window (surface) for preview
-        egl10.eglMakeCurrent(eglDisplay, eglSurfacePreview, eglSurfacePreview, eglContext);
-        sampleGL20Video.draw();
+            // Step 9: Fragment shader draw preview texture (samplerExternalOES)
+            // Draw on MediaCodec InputSurface for encode
+            if (null != eglSurfaceEncode) {
+                egl10.eglMakeCurrent(eglDisplay, eglSurfaceEncode, eglSurfaceEncode, eglContext);
+                sampleGL20Video.draw();
+                egl10.eglSwapBuffers(eglDisplay, eglSurfaceEncode);
+            }
+            // Draw on native window (surface) for preview
+            if (null != eglSurfacePreview) {
+                egl10.eglMakeCurrent(eglDisplay, eglSurfacePreview, eglSurfacePreview, eglContext);
+                sampleGL20Video.draw();
+            }
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
